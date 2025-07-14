@@ -6,9 +6,13 @@ Click the green "Code" button above
 Select "Codespaces" tab
 Click "Create codespace on main"
 Wait for setup (about 1-2 minutes)
-Run the app:
+Install dependencies and run:
 bash
+pip install flask python-pptx werkzeug
 python app.py
+Or use the quick setup script:
+bash
+chmod +x run.sh && ./run.sh
 Open the forwarded port (Codespaces will show a popup)
 📁 Expected File Format
 Your input text file should follow this structure:
