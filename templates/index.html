@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide Deck Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .file-upload {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 40px 20px;
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .file-upload-label:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .file-upload-label.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .theme-selection {
+            margin-bottom: 30px;
+        }
+
+        .theme-selection label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .theme-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .theme-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .format-example {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-line;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .flash-error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+
+        .flash-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Slide Deck Generator</h1>
+            <p>Transform your formatted notes into professional PowerPoint presentations</p>
+        </div>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="flash-message flash-error">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form id="slideForm" method="POST" action="/generate" enctype="multipart/form-data">
+            <div class="upload-section">
+                <div class="file-upload-wrapper">
+                    <input type="file" id="file" name="file" class="file-upload" accept=".txt" required>
+                    <label for="file" class="file-upload-label" id="fileLabel">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">Click to select your text file</div>
+                        <div class="upload-subtext">or drag and drop your .txt file here</div>
+                    </label>
+                    <div class="file-info" id="fileInfo">
+                        <strong>Selected file:</strong> <span id="fileName"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theme-selection">
+                <label for="theme">Select Theme:</label>
+                <select id="theme" name="theme" class="theme-select">
+                    {% for theme in themes %}
+                        <option value="{{ theme }}">{{ theme }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="generate-btn" id="generateBtn">
+                🚀 Generate Slides
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Generating your presentation...</div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Instructions</h3>
+            <ul>
+                <li>Select your text file with formatted notes</li>
+                <li>Choose a theme for your presentation</li>
+                <li>Click "Generate Slides" to create your PowerPoint</li>
+                <li>Your presentation will automatically download when ready</li>
+            </ul>
+            
+            <div class="format-example">Expected format:
+0. Your First Slide Title
+Slide Bullets:
+• First bullet point
+• Second bullet point
+• Third bullet point
+
+Speaker Notes:
+Your detailed speaker notes go here...
+
+1. Your Second Slide Title
+Slide Bullets:
+• More bullet points
+• Additional content
+
+Speaker Notes:
+More detailed notes...</div>
+        </div>
+    </div>
+
+    <script>
+        // File upload handling
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.getElementById('fileLabel');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const form = document.getElementById('slideForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+
+        // File selection handler
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                fileInfo.classList.add('show');
+                fileLabel.style.borderColor = '#4caf50';
+                fileLabel.style.background = '#e8f5e8';
+            }
+        });
+
+        // Drag and drop functionality
+        fileLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileLabel.classList.add('dragover');
+        });
+
+        fileLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileLabel.classList.remove('dragover');
+        });
+
+        fileLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileLabel.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                const file = files[0];
+                fileName.textContent = file.name;
+                fileInfo.classList.add('show');
+                fileLabel.style.borderColor = '#4caf50';
+                fileLabel.style.background = '#e8f5e8';
+            }
+        });
+
+        // Form submission handler
+        form.addEventListener('submit', function(e) {
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            loading.classList.add('show');
+            
+            // Re-enable button after 10 seconds (fallback)
+            setTimeout(() => {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🚀 Generate Slides';
+                loading.classList.remove('show');
+            }, 10000);
+        });
+
+        // Reset form after download
+        window.addEventListener('focus', function() {
+            setTimeout(() => {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🚀 Generate Slides';
+                loading.classList.remove('show');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
