@@ -21,6 +21,6 @@
             "onAutoForward": "openBrowser"
         }
     },
-    "postCreateCommand": "pip install -r requirements.txt",
+    "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt",
     "remoteUser": "vscode"
 }
